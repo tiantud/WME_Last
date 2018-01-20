@@ -47,7 +47,7 @@ window.onscroll = stick;
  ********************************************************/
 // load content on page load
 $(document).ready(function() {
-  alert("Your script!");
+  load_properties();
 });
 
 /********************************************************
@@ -61,3 +61,23 @@ $(document).ready(function() {
  ********************************************************/
 
 /* YOUR SCRIPTS */
+
+/********************************************************
+ **************** helper functions **********************
+ ********************************************************/
+
+ function load_properties(){
+   $.ajax({
+     type: "GET",
+     url: "http://127.0.0.1:3000/properties",
+     dataType: "json",
+     success: function(data){
+       $("#results").append('all good!');
+       alert(JSON.stringify(data));
+     },
+     error: function(){
+       $("#results").append("error!");
+       alert('error');
+     }
+   });
+ }
