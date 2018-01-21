@@ -49,6 +49,7 @@ window.onscroll = stick;
 var properties;
 var items;
 var prop_index;
+var mouseOverCountry;
 $(document).ready(function() {
 
   load_properties(function(data){
@@ -62,6 +63,8 @@ $(document).ready(function() {
 
   prop_index = 0;
   refresh_table(prop_index, "#table2");
+
+  initMap();
 });
 
 //when select bar is changed
@@ -208,6 +211,8 @@ function set_table(table_id, data, selected_property){
     d3.select(this).style('fill', 'blue');
     d3.selectAll(".bar").each(function(d){
       if(d3.select(this).attr("x") == xValue){
+        mouseOverCountry = d["name"];
+        $("#test1").text(mouseOverCountry);
         d3.select(this).style('fill', 'blue');
       }
     });
@@ -218,6 +223,8 @@ function set_table(table_id, data, selected_property){
     d3.select(this).style('fill', 'gray');
     d3.selectAll(".bar").each(function(d){
       if(d3.select(this).attr("x") == xValue){
+        mouseOverCountry = null;
+        $("#test1").text(mouseOverCountry);
         d3.select(this).style('fill', 'gray');
       }
     });
@@ -228,4 +235,28 @@ function set_table(table_id, data, selected_property){
  ********************* Leaflet **************************
  ********************************************************/
 
-/* YOUR SCRIPTS */
+ function initMap(){
+   var mymap = L.map('mapid').setView([51.505, -0.09], 13);
+
+	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+		maxZoom: 18,
+		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		id: 'mapbox.streets'
+	}).addTo(mymap);
+
+	L.marker([51.5, -0.09]).addTo(mymap)
+		.bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
+
+	var popup = L.popup();
+
+	function onMapClick(e) {
+		popup
+			.setLatLng(e.latlng)
+			.setContent("You clicked the map at " + e.latlng.toString())
+			.openOn(mymap);
+	}
+
+	mymap.on('click', onMapClick);
+ }

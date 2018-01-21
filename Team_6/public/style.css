@@ -310,3 +310,7 @@ footer > .container > div.right {
 .bar{
   fill: gray;
 }
+
+#map{
+  height: 100%
+}
