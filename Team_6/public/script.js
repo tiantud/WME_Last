@@ -57,17 +57,20 @@ $(document).ready(function() {
 
   set_options(properties);
 
-  prop_index = 4;
+  prop_index = 0;
   refresh_table(prop_index, "#table1");
 
-  prop_index = 6;
+  prop_index = 0;
   refresh_table(prop_index, "#table2");
-
-
-
-
 });
 
+//when select bar is changed
+$(".select_bar").change(function(){
+  var table_ID = "";
+  table_ID = $(this).find(":selected").parent().next().attr('id');
+  prop_index = $(this).find(":selected").index();
+  refresh_table(prop_index, "\#" + table_ID);
+});
 
 
 // get all properties
@@ -139,6 +142,8 @@ function refresh_table(prop_index, table_id){
   var filter_result = item_filter(prop_index, items);
   var selected_property = properties[prop_index];
 
+
+
   set_table(table_id, filter_result, selected_property);
 }
 
@@ -155,6 +160,9 @@ function set_table(table_id, data, selected_property){
 
   var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
       y = d3.scaleLinear().rangeRound([height, 0]);
+
+  var str = table_id +" > *";
+  d3.selectAll(str).remove();
 
   var g = svg.append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
