@@ -45,26 +45,25 @@ window.onscroll = stick;
 /********************************************************
  ********************* AJAX *****************************
  ********************************************************/
-// load content on page load
 var properties;
 var items;
 var prop_index;
 var mouseOverCountry;
-$(document).ready(function() {
 
+// load content on page load
+$(document).ready(function() {
+  //load properties via API
   load_properties(function(data){
     properties = data;
   });
 
+  //fulfill two select bar
   set_options(properties);
 
+  //two tables will both show: country name -> ID
   prop_index = 0;
   refresh_table(prop_index, "#table1");
-
-  prop_index = 0;
   refresh_table(prop_index, "#table2");
-
-  initMap();
 });
 
 //when select bar is changed
@@ -108,7 +107,26 @@ function load_items(callback){
   });
 }
 
-//set options with recieved properties from API
+//get position of all listed countries
+function get_position(){
+  var items;
+  load_items(function(data){
+    items = data;
+  });
+  for(var i=0; i<items.length; i++){
+    for(var key=0; key<=properties.length; key++){
+      //properties[1] = name
+      //properties[12] = gps_lat
+      //properties[13] = gps_long
+      if(key!=1 && key!=12 && key!=13){
+        delete items[i][properties[key]];
+      }
+    }
+  }
+  return items;
+}
+
+//fulfill options with recieved properties from API
 function set_options(properties){
   $.each(properties, function(key, value){
     $('#sel_table_1')
@@ -124,7 +142,7 @@ function set_options(properties){
 
 //keep name and selected data
 function item_filter(property_id, items){
-  for(var i=0; i<items.length - 1; i++){
+  for(var i=0; i<items.length; i++){
     for(var key=0; key<=properties.length; key++){
       if(key!=property_id && key!=1){
         delete items[i][properties[key]];
@@ -142,12 +160,16 @@ function refresh_table(prop_index, table_id){
     items = data;
   });
 
+  //delete unselected data
   var filter_result = item_filter(prop_index, items);
   var selected_property = properties[prop_index];
 
-
-
+  //refresh the D3 table
   set_table(table_id, filter_result, selected_property);
+
+  alert(selected_property);
+  //refresh map
+  refreshMap(filter_result, selected_property);
 }
 
 /********************************************************
@@ -206,6 +228,7 @@ function set_table(table_id, data, selected_property){
         .on('mouseout', handleMouseOut);
   }
 
+  //change color when mouse is over a bar
   function handleMouseOver(){
     var xValue = d3.select(this).attr("x");
     d3.select(this).style('fill', 'blue');
@@ -218,6 +241,7 @@ function set_table(table_id, data, selected_property){
     });
   }
 
+  //change color back when mouse leave the area
   function handleMouseOut(){
     var xValue = d3.select(this).attr("x");
     d3.select(this).style('fill', 'gray');
@@ -234,26 +258,42 @@ function set_table(table_id, data, selected_property){
 /********************************************************
  ********************* Leaflet **************************
  ********************************************************/
+//init map
+var mymap = L.map('mapid').setView([51.505, -0.09], 2);
 
- function initMap(){
-	
-	var mymap = L.map('mapid').setView([51.505, -0.09], 2);
+L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+}).addTo(mymap);
 
-	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
-    }).addTo(mymap);
+var markerGroup = L.layerGroup().addTo(mymap);
 
-	L.marker([51.5, -0.09]).addTo(mymap)
-		.bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
+var popup = L.popup();
 
-	var popup = L.popup();
+function onMapClick(e) {
+	popup
+		.setLatLng(e.latlng)
+		.setContent("You clicked the map at " + e.latlng.toString())
+		.openOn(mymap);
+}
 
-	function onMapClick(e) {
-		popup
-			.setLatLng(e.latlng)
-			.setContent("You clicked the map at " + e.latlng.toString())
-			.openOn(mymap);
-	}
+mymap.on('click', onMapClick);
 
-	mymap.on('click', onMapClick);
- }
+function refreshMap(filter_result, selected_property){
+  markerGroup.clearLayers();
+
+  var allPositions = get_position();
+  // alert(JSON.stringify(allPositions));
+
+  //set all marker with Popup
+  var lat, long;
+  for(var i=0; i<allPositions.length; i++){
+  lat = allPositions[i].gps_lat;
+  long = allPositions[i].gps_long;
+  // alert(""+ lat + ", " + long);
+  L.marker([lat, long]).addTo(markerGroup)
+		.bindPopup("<b>" + selected_property + "</b><br />" +
+               "<b>from:" + allPositions[i].name + "</b>" +
+               "<br /><br />" +
+               "<b>" + filter_result[i][selected_property] + "</b>");
+  }
+}
