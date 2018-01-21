@@ -48,26 +48,21 @@ window.onscroll = stick;
 // load content on page load
 var properties;
 var items;
+var prop_index;
 $(document).ready(function() {
 
   load_properties(function(data){
     properties = data;
   });
 
-  load_items(function(data){
-    items = data;
-  });
-
   set_options(properties);
 
-  set_table("#table1");
-  set_table("#table2");
+  prop_index = 4;
+  refresh_table(prop_index, "#table1");
 
-  //item_filter(5);
+  prop_index = 6;
+  refresh_table(prop_index, "#table2");
 
-  //delete items[1];
-
-  alert(JSON.stringify(items));
 
 
 
@@ -121,30 +116,38 @@ function set_options(properties){
   });
 }
 
-/*
-//keep selected data
-function item_filter(property_id){
-  load_items()(function(data){
-    items = data;
-  });
-  for(var i=0; i < properties.length; i++){
-    if(i != 1 && i != property_id){
-      var prop = properties[i];
-      for(var j=0; j < items.length; j++){
-        delete items[i].prop;
+//keep name and selected data
+function item_filter(property_id, items){
+  for(var i=0; i<items.length - 1; i++){
+    for(var key=0; key<=properties.length; key++){
+      if(key!=property_id && key!=1){
+        delete items[i][properties[key]];
       }
     }
   }
-  for(var j=0; j < items.length; j++){
-    delete items[i].["name"];
-  }
-}*/
+  return items;
+}
+
+//Pack up the relativ functions
+function refresh_table(prop_index, table_id){
+  //reload items
+  var items;
+  load_items(function(data){
+    items = data;
+  });
+
+  var filter_result = item_filter(prop_index, items);
+  var selected_property = properties[prop_index];
+
+  set_table(table_id, filter_result, selected_property);
+}
 
 /********************************************************
  ********************* D3js vis *************************
  ********************************************************/
 
-function set_table(table_id){
+//This is the example code from D3
+function set_table(table_id, data, selected_property){
   var svg = d3.select(table_id),
       margin = {top: 20, right: 20, bottom: 30, left: 40},
       width = +svg.attr("width") - margin.left - margin.right,
@@ -156,14 +159,8 @@ function set_table(table_id){
   var g = svg.append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  d3.tsv("data.tsv", function(d) {
-    d.frequency = +d.frequency;
-    return d;
-  }, function(error, data) {
-    if (error) throw error;
-
-    x.domain(data.map(function(d) { return d.letter; }));
-    y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
+    x.domain(data.map(function(d) { return d["name"]; }));
+    y.domain([0, d3.max(data, function(d) { return d[selected_property]; })]);
 
     g.append("g")
         .attr("class", "axis axis--x")
@@ -184,11 +181,11 @@ function set_table(table_id){
       .data(data)
       .enter().append("rect")
         .attr("class", "bar")
-        .attr("x", function(d) { return x(d.letter); })
-        .attr("y", function(d) { return y(d.frequency); })
+        .attr("x", function(d) { return x(d["name"]); })
+        .attr("y", function(d) { return y(d[selected_property]); })
         .attr("width", x.bandwidth())
-        .attr("height", function(d) { return height - y(d.frequency); });
-  });
+        .attr("height", function(d) { return height - y(d[selected_property]); });
+
 }
 
 /********************************************************
