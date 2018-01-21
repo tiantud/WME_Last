@@ -166,8 +166,7 @@ function refresh_table(prop_index, table_id){
 
   //refresh the D3 table
   set_table(table_id, filter_result, selected_property);
-
-  alert(selected_property);
+  
   //refresh map
   refreshMap(filter_result, selected_property);
 }
@@ -231,12 +230,11 @@ function set_table(table_id, data, selected_property){
   //change color when mouse is over a bar
   function handleMouseOver(){
     var xValue = d3.select(this).attr("x");
-    d3.select(this).style('fill', 'blue');
     d3.selectAll(".bar").each(function(d){
       if(d3.select(this).attr("x") == xValue){
         mouseOverCountry = d["name"];
         $("#test1").text(mouseOverCountry);
-        d3.select(this).style('fill', 'blue');
+        d3.select(this).style('fill', 'steelblue');
       }
     });
   }
@@ -244,7 +242,6 @@ function set_table(table_id, data, selected_property){
   //change color back when mouse leave the area
   function handleMouseOut(){
     var xValue = d3.select(this).attr("x");
-    d3.select(this).style('fill', 'gray');
     d3.selectAll(".bar").each(function(d){
       if(d3.select(this).attr("x") == xValue){
         mouseOverCountry = null;
@@ -276,24 +273,46 @@ function onMapClick(e) {
 		.openOn(mymap);
 }
 
+var greyIcon = new L.Icon({
+	iconUrl: 'leaflet/images/marker-icon-grey.png',
+	shadowUrl: 'leaflet/images/marker-shadow.png',
+	iconSize: [25, 41],
+	iconAnchor: [12, 41],
+	popupAnchor: [1, -34],
+	shadowSize: [41, 41]
+});
+
+var blueIcon = new L.Icon({
+	iconUrl: 'leaflet/images//marker-icon-blue.png',
+	shadowUrl: 'leaflet/images/marker-shadow.png',
+	iconSize: [25, 41],
+	iconAnchor: [12, 41],
+	popupAnchor: [1, -34],
+	shadowSize: [41, 41]
+});
+
 mymap.on('click', onMapClick);
 
 function refreshMap(filter_result, selected_property){
   markerGroup.clearLayers();
 
   var allPositions = get_position();
-  // alert(JSON.stringify(allPositions));
 
   //set all marker with Popup
   var lat, long;
   for(var i=0; i<allPositions.length; i++){
   lat = allPositions[i].gps_lat;
   long = allPositions[i].gps_long;
-  // alert(""+ lat + ", " + long);
-  L.marker([lat, long]).addTo(markerGroup)
+  L.marker([lat, long], {icon: greyIcon}).addTo(markerGroup)
 		.bindPopup("<b>" + selected_property + "</b><br />" +
                "<b>from:" + allPositions[i].name + "</b>" +
                "<br /><br />" +
-               "<b>" + filter_result[i][selected_property] + "</b>");
+               "<b>" + filter_result[i][selected_property] + "</b>")
+    .on('mouseover', function(){
+      this.setIcon(blueIcon);
+    })
+    .on('mouseout', function(){
+      this.setIcon(greyIcon);
+    });
   }
 }
