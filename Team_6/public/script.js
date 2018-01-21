@@ -154,7 +154,7 @@ function refresh_table(prop_index, table_id){
 //This is the example code from D3
 function set_table(table_id, data, selected_property){
   var svg = d3.select(table_id),
-      margin = {top: 20, right: 20, bottom: 250, left: 40},
+      margin = {top: 20, right: 20, bottom: 150, left: 40},
       width = +svg.attr("width") - margin.left - margin.right,
       height = +svg.attr("height") - margin.top - margin.bottom;
 
@@ -167,10 +167,10 @@ function set_table(table_id, data, selected_property){
   var g = svg.append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    x.domain(data.map(function(d) { return d["name"]; }));
-    y.domain([0, d3.max(data, function(d) { return d[selected_property]; })]);
+  x.domain(data.map(function(d) { return d["name"]; }));
+  y.domain([0, d3.max(data, function(d) { return d[selected_property]; })]);
 
-    g.append("g")
+  g.append("g")
         .attr("class", "axis axis--x")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x))
@@ -181,7 +181,7 @@ function set_table(table_id, data, selected_property){
         .attr("transform", "rotate(90)")
         .style("text-anchor", "start");
 
-    g.append("g")
+  g.append("g")
         .attr("class", "axis axis--y")
         .call(d3.axisLeft(y).ticks(10, "%"))
       .append("text")
@@ -191,16 +191,38 @@ function set_table(table_id, data, selected_property){
         .attr("text-anchor", "end")
         .text("Frequency");
 
-    g.selectAll(".bar")
+  g.selectAll(".bar")
       .data(data)
       .enter().append("rect")
         .attr("class", "bar")
         .attr("x", function(d) { return x(d["name"]); })
         .attr("y", function(d) { return y(d[selected_property]); })
         .attr("width", x.bandwidth())
-        .attr("height", function(d) { return height - y(d[selected_property]); });
+        .attr("height", function(d) { return height - y(d[selected_property]); })
+        .on('mouseover', handleMouseOver)
+        .on('mouseout', handleMouseOut);
+  }
 
-}
+  function handleMouseOver(){
+    var xValue = d3.select(this).attr("x");
+    d3.select(this).style('fill', 'blue');
+    d3.selectAll(".bar").each(function(d){
+      if(d3.select(this).attr("x") == xValue){
+        d3.select(this).style('fill', 'blue');
+      }
+    });
+  }
+
+  function handleMouseOut(){
+    var xValue = d3.select(this).attr("x");
+    d3.select(this).style('fill', 'gray');
+    d3.selectAll(".bar").each(function(d){
+      if(d3.select(this).attr("x") == xValue){
+        d3.select(this).style('fill', 'gray');
+      }
+    });
+  }
+
 
 /********************************************************
  ********************* Leaflet **************************
