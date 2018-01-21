@@ -149,7 +149,7 @@ function refresh_table(prop_index, table_id){
 //This is the example code from D3
 function set_table(table_id, data, selected_property){
   var svg = d3.select(table_id),
-      margin = {top: 20, right: 20, bottom: 30, left: 40},
+      margin = {top: 20, right: 20, bottom: 250, left: 40},
       width = +svg.attr("width") - margin.left - margin.right,
       height = +svg.attr("height") - margin.top - margin.bottom;
 
@@ -165,7 +165,13 @@ function set_table(table_id, data, selected_property){
     g.append("g")
         .attr("class", "axis axis--x")
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x));
+        .call(d3.axisBottom(x))
+      .selectAll("text")
+        .attr("y", 0)
+        .attr("x", 9)
+        .attr("dy", ".35em")
+        .attr("transform", "rotate(90)")
+        .style("text-anchor", "start");
 
     g.append("g")
         .attr("class", "axis axis--y")
