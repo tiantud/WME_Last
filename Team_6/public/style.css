@@ -160,6 +160,7 @@ footer > .container > div.right {
 *********************************************************/
 
 /* only if you like to broke up the menu in two lines:
+
 @media screen and (max-width: 815px) {
 		nav {
 				height: auto;

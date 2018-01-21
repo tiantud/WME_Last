@@ -47,19 +47,35 @@ window.onscroll = stick;
  ********************************************************/
 // load content on page load
 var properties;
+var items;
 $(document).ready(function() {
 
   load_properties(function(data){
     properties = data;
   });
 
+  load_items(function(data){
+    items = data;
+  });
+
   set_options(properties);
 
   set_table("#table1");
+  set_table("#table2");
+
+  //item_filter(5);
+
+  //delete items[1];
+
+  alert(JSON.stringify(items));
+
+
 
 });
 
-// asynchronous ajax request need callback to return value
+
+
+// get all properties
 function load_properties(callback){
   $.ajax({
     type: "GET",
@@ -70,7 +86,22 @@ function load_properties(callback){
       callback(data);
     },
     error: function(){
-      $("#results").append("error!");
+      alert('error');
+    }
+  });
+}
+
+// get all items
+function load_items(callback){
+  $.ajax({
+    type: "GET",
+    url: "http://localhost:3000/items",
+    dataType: "json",
+    async: false,
+    success: function(data){
+      callback(data);
+    },
+    error: function(){
       alert('error');
     }
   });
@@ -89,6 +120,25 @@ function set_options(properties){
       .text(value));
   });
 }
+
+/*
+//keep selected data
+function item_filter(property_id){
+  load_items()(function(data){
+    items = data;
+  });
+  for(var i=0; i < properties.length; i++){
+    if(i != 1 && i != property_id){
+      var prop = properties[i];
+      for(var j=0; j < items.length; j++){
+        delete items[i].prop;
+      }
+    }
+  }
+  for(var j=0; j < items.length; j++){
+    delete items[i].["name"];
+  }
+}*/
 
 /********************************************************
  ********************* D3js vis *************************
