@@ -46,38 +46,103 @@ window.onscroll = stick;
  ********************* AJAX *****************************
  ********************************************************/
 // load content on page load
+var properties;
 $(document).ready(function() {
-  load_properties();
+
+  load_properties(function(data){
+    properties = data;
+  });
+
+  set_options(properties);
+
+  set_table("#table1");
+
 });
+
+// asynchronous ajax request need callback to return value
+function load_properties(callback){
+  $.ajax({
+    type: "GET",
+    url: "http://localhost:3000/properties",
+    dataType: "json",
+    async: false,
+    success: function(data){
+      callback(data);
+    },
+    error: function(){
+      $("#results").append("error!");
+      alert('error');
+    }
+  });
+}
+
+//set options with recieved properties from API
+function set_options(properties){
+  $.each(properties, function(key, value){
+    $('#sel_table_1')
+     .append($("<option></option>")
+     .attr("value", key)
+     .text(value));
+     $('#sel_table_2')
+      .append($("<option></option>")
+      .attr("value", key)
+      .text(value));
+  });
+}
 
 /********************************************************
  ********************* D3js vis *************************
  ********************************************************/
 
-/* YOUR SCRIPTS */
+function set_table(table_id){
+  var svg = d3.select(table_id),
+      margin = {top: 20, right: 20, bottom: 30, left: 40},
+      width = +svg.attr("width") - margin.left - margin.right,
+      height = +svg.attr("height") - margin.top - margin.bottom;
+
+  var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+      y = d3.scaleLinear().rangeRound([height, 0]);
+
+  var g = svg.append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  d3.tsv("data.tsv", function(d) {
+    d.frequency = +d.frequency;
+    return d;
+  }, function(error, data) {
+    if (error) throw error;
+
+    x.domain(data.map(function(d) { return d.letter; }));
+    y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
+
+    g.append("g")
+        .attr("class", "axis axis--x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+    g.append("g")
+        .attr("class", "axis axis--y")
+        .call(d3.axisLeft(y).ticks(10, "%"))
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", "0.71em")
+        .attr("text-anchor", "end")
+        .text("Frequency");
+
+    g.selectAll(".bar")
+      .data(data)
+      .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { return x(d.letter); })
+        .attr("y", function(d) { return y(d.frequency); })
+        .attr("width", x.bandwidth())
+        .attr("height", function(d) { return height - y(d.frequency); });
+  });
+}
 
 /********************************************************
  ********************* Leaflet **************************
  ********************************************************/
 
 /* YOUR SCRIPTS */
-
-/********************************************************
- **************** helper functions **********************
- ********************************************************/
-
- function load_properties(){
-   $.ajax({
-     type: "GET",
-     url: "http://127.0.0.1:3000/properties",
-     dataType: "json",
-     success: function(data){
-       $("#results").append('all good!');
-       alert(JSON.stringify(data));
-     },
-     error: function(){
-       $("#results").append("error!");
-       alert('error');
-     }
-   });
- }
