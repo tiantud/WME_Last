@@ -314,3 +314,8 @@ footer > .container > div.right {
 #main_container{
   margin-top: 100px;
 }
+
+#mapid{
+  margin-top: -550px;
+  margin-left: 550px;
+}

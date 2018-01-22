@@ -175,6 +175,7 @@ function refresh_table(prop_index, table_id){
 
   //delete unselected data
   var filter_result = item_filter(prop_index, items);
+
   var selected_property = properties[prop_index];
 
   //refresh the D3 table
@@ -191,7 +192,7 @@ function refresh_table(prop_index, table_id){
 //This is the example code from D3
 function set_table(table_id, data, selected_property){
   var svg = d3.select(table_id),
-      margin = {top: 20, right: 20, bottom: 150, left: 40},
+      margin = {top: 20, right: 20, bottom: 120, left: 40},
       width = +svg.attr("width") - margin.left - margin.right,
       height = +svg.attr("height") - margin.top - margin.bottom;
 
@@ -205,7 +206,15 @@ function set_table(table_id, data, selected_property){
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   x.domain(data.map(function(d) { return d["name"]; }));
-  y.domain([0, d3.max(data, function(d) { return d[selected_property]; })]);
+  var min = d3.min(data, function(d) { return parseFloat(d[selected_property]); });
+  var max = d3.max(data, function(d) { return parseFloat(d[selected_property]); });
+  if(min < 0){
+    min = min * 1.1;
+  } else {
+    min = 0;
+  }
+  max = max * 1.1;
+  y.domain([min, max]);
 
   g.append("g")
         .attr("class", "axis axis--x")
@@ -281,7 +290,7 @@ function set_table(table_id, data, selected_property){
 var mymap = L.map('mapid').setView([51.505, -0.09], 2);
 
 L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-      attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+      attribution: ' &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
 }).addTo(mymap);
 
 var markerGroup = L.layerGroup().addTo(mymap);
