@@ -107,27 +107,6 @@ app.get('/properties/:id', function (req, res) {
 
     res.status(200).send(JSON.stringify(response));
 });
-/*
-// GET name and data of selected property from all country
-app.get('/selected_property/:id', function (req, res) {
-    var jsonStruct_country_found = "";
-    var found = false;
-    var keys = Object.keys(jsonStruct_countrys[0]);
-    for (var i=0; i < jsonStruct_countrys.length; i++) {
-        jsonStruct_countrys_found.push( jsonStruct_countrys[i] );
-        for(var j=0; j < keys.length; j++){
-            if(j!=0 || j!=req.params.id){
-                var shabi_key = key[j];
-                delete.jsonStruct_countrys_found[i].shabi_key;
-            }
-        }
-    }
-    if (!found) {
-        jsonStruct_country_found = "No such property avalable.";
-    }
-
-    res.send( JSON.stringify(jsonStruct_country_found) );
-});*/
 
 //delete last item - BROWSER GET
 app.get('/delete', function(req, res) {

@@ -126,6 +126,19 @@ function get_position(){
   return items;
 }
 
+//get country_id from name
+function get_id_from_name(name){
+  var items;
+  load_items(function(data){
+    items = data;
+  });
+  for(var i=0; i<items.length;i++){
+    if(items[i].name == name){
+      return i;
+    }
+  }
+}
+
 //fulfill options with recieved properties from API
 function set_options(properties){
   $.each(properties, function(key, value){
@@ -232,13 +245,13 @@ function set_table(table_id, data, selected_property){
   function handleMouseOverFromD3(){
     var countryName = d3.select(this).attr("countryName");
     handleMouseOver(countryName);
+    marker_list[get_id_from_name(countryName)].setIcon(blueIcon);
   }
   //use independent variable, so leaflet can also access to it
   function handleMouseOver(countryName){
     d3.selectAll(".bar").each(function(d){
       if(d3.select(this).attr("countryName") == countryName){
         mouseOverCountry = countryName;
-        $("#test1").text(mouseOverCountry);
         d3.select(this).style('fill', 'steelblue');
       }
     });
@@ -248,13 +261,13 @@ function set_table(table_id, data, selected_property){
   function handleMouseOutFromD3(){
     var countryName = d3.select(this).attr("countryName");
     handleMouseOut(countryName)
+    marker_list[get_id_from_name(countryName)].setIcon(greyIcon);
   }
   //use independent variable, so leaflet can also access to it
   function handleMouseOut(countryName){
     d3.selectAll(".bar").each(function(d){
       if(d3.select(this).attr("countryName") == countryName){
         mouseOverCountry = null;
-        $("#test1").text(mouseOverCountry);
         d3.select(this).style('fill', 'gray');
       }
     });
@@ -302,6 +315,8 @@ var blueIcon = new L.Icon({
 
 mymap.on('click', onMapClick);
 
+var marker_list = new Array();
+
 function refreshMap(filter_result, selected_property){
   markerGroup.clearLayers();
 
@@ -312,7 +327,7 @@ function refreshMap(filter_result, selected_property){
   for(var i=0; i<allPositions.length; i++){
   lat = allPositions[i].gps_lat;
   long = allPositions[i].gps_long;
-  L.marker([lat, long], {icon: greyIcon, countryName: allPositions[i].name}).addTo(markerGroup)
+  marker_list[i] = L.marker([lat, long], {icon: greyIcon, countryName: allPositions[i].name}).addTo(markerGroup)
 		.bindPopup("<b>" + selected_property + "</b><br />" +
                "<b>from:" + allPositions[i].name + "</b>" +
                "<br /><br />" +
