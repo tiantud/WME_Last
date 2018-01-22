@@ -166,7 +166,7 @@ function refresh_table(prop_index, table_id){
 
   //refresh the D3 table
   set_table(table_id, filter_result, selected_property);
-  
+
   //refresh map
   refreshMap(filter_result, selected_property);
 }
@@ -220,19 +220,24 @@ function set_table(table_id, data, selected_property){
       .enter().append("rect")
         .attr("class", "bar")
         .attr("x", function(d) { return x(d["name"]); })
+        .attr("countryName", function(d) { return d["name"]; })
         .attr("y", function(d) { return y(d[selected_property]); })
         .attr("width", x.bandwidth())
         .attr("height", function(d) { return height - y(d[selected_property]); })
-        .on('mouseover', handleMouseOver)
-        .on('mouseout', handleMouseOut);
+        .on('mouseover', handleMouseOverFromD3)
+        .on('mouseout', handleMouseOutFromD3);
   }
 
   //change color when mouse is over a bar
-  function handleMouseOver(){
-    var xValue = d3.select(this).attr("x");
+  function handleMouseOverFromD3(){
+    var countryName = d3.select(this).attr("countryName");
+    handleMouseOver(countryName);
+  }
+  //use independent variable, so leaflet can also access to it
+  function handleMouseOver(countryName){
     d3.selectAll(".bar").each(function(d){
-      if(d3.select(this).attr("x") == xValue){
-        mouseOverCountry = d["name"];
+      if(d3.select(this).attr("countryName") == countryName){
+        mouseOverCountry = countryName;
         $("#test1").text(mouseOverCountry);
         d3.select(this).style('fill', 'steelblue');
       }
@@ -240,10 +245,14 @@ function set_table(table_id, data, selected_property){
   }
 
   //change color back when mouse leave the area
-  function handleMouseOut(){
-    var xValue = d3.select(this).attr("x");
+  function handleMouseOutFromD3(){
+    var countryName = d3.select(this).attr("countryName");
+    handleMouseOut(countryName)
+  }
+  //use independent variable, so leaflet can also access to it
+  function handleMouseOut(countryName){
     d3.selectAll(".bar").each(function(d){
-      if(d3.select(this).attr("x") == xValue){
+      if(d3.select(this).attr("countryName") == countryName){
         mouseOverCountry = null;
         $("#test1").text(mouseOverCountry);
         d3.select(this).style('fill', 'gray');
@@ -303,16 +312,18 @@ function refreshMap(filter_result, selected_property){
   for(var i=0; i<allPositions.length; i++){
   lat = allPositions[i].gps_lat;
   long = allPositions[i].gps_long;
-  L.marker([lat, long], {icon: greyIcon}).addTo(markerGroup)
+  L.marker([lat, long], {icon: greyIcon, countryName: allPositions[i].name}).addTo(markerGroup)
 		.bindPopup("<b>" + selected_property + "</b><br />" +
                "<b>from:" + allPositions[i].name + "</b>" +
                "<br /><br />" +
                "<b>" + filter_result[i][selected_property] + "</b>")
     .on('mouseover', function(){
       this.setIcon(blueIcon);
+      handleMouseOver(this.options.countryName);
     })
     .on('mouseout', function(){
       this.setIcon(greyIcon);
+      handleMouseOut(this.options.countryName);
     });
   }
 }
