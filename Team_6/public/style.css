@@ -311,6 +311,6 @@ footer > .container > div.right {
   fill: gray;
 }
 
-#map{
-  height: 100%
+#main_container{
+  margin-top: 100px;
 }

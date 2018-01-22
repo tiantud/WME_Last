@@ -69,7 +69,7 @@ $(document).ready(function() {
 //when select bar is changed
 $(".select_bar").change(function(){
   var table_ID = "";
-  table_ID = $(this).find(":selected").parent().next().attr('id');
+  table_ID = $(this).find(":selected").parent().next().next().attr('id');
   prop_index = $(this).find(":selected").index();
   refresh_table(prop_index, "\#" + table_ID);
 });
@@ -220,7 +220,7 @@ function set_table(table_id, data, selected_property){
 
   g.append("g")
         .attr("class", "axis axis--y")
-        .call(d3.axisLeft(y).ticks(10, "%"))
+        .call(d3.axisLeft(y))
       .append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
