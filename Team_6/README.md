@@ -11,5 +11,5 @@
 
 The most relevant REST calls are:
 
-* `http://localhost:3000/properties` -> returns all properties (json)
-* `http://localhost:3000/items` -> gives you all the data (json)
+* `http://localhost:3000/properties` -> All properties of data (json)
+* `http://localhost:3000/items` -> All data in the server (json)
